@@ -7,10 +7,10 @@ import (
 	"os/signal"
 
 	"github.com/go-telegram/bot"
-	"github.com/go-telegram/bot/models"
+	"github.com/go-telegram/models"
 )
 
-func main() {
+func botInit() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
@@ -29,6 +29,10 @@ func main() {
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/tcat", bot.MatchTypeExact, tcatHandler)
 
 	b.Start(ctx)
+}
+
+func addHandler(cmd string, handler bot.HandlerFunc, b *bot.Bot) {
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/"+cmd, bot.MatchTypeExact, handler)
 }
 
 func logMessage(next bot.HandlerFunc) bot.HandlerFunc {
