@@ -1,16 +1,16 @@
 package cat
 
 import (
+	"bytes"
 	"io"
 	"log"
 	"net/http"
-	"os"
 )
 
-const url = "https://cataas.com/cat"
+const baseUrl = "https://cataas.com/cat"
 
-func GetCat() []byte {
-	res, err := http.Get(url)
+func GetCat() io.Reader {
+	res, err := http.Get(baseUrl)
 
 	if err != nil {
 		log.Fatalf("%v", err)
@@ -23,24 +23,39 @@ func GetCat() []byte {
 		log.Fatal(err)
 	}
 
-	return data
+	return bytes.NewReader(data)
 }
 
-func WriteCat(cat []byte) *os.File {
-	f, err := os.CreateTemp("", "tmp-")
+func GetGifCat() io.Reader {
+	res, err := http.Get(baseUrl + "/gif")
+
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+
+	data, err := io.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer f.Close()
-	defer os.Remove(f.Name())
 
-	if size, err := f.Write(cat); err != nil {
-		log.Fatal(err)
+	return bytes.NewReader(data)
+}
 
-	} else {
-		log.Println(size)
+func GetTextCat(text string) io.Reader {
+	res, err := http.Get(baseUrl + "/says/" + text)
+
+	if err != nil {
+		log.Fatalf("%v", err)
 	}
 
-	return f
+	data, err := io.ReadAll(res.Body)
+	defer res.Body.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return bytes.NewReader(data)
 }
